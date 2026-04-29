@@ -40,10 +40,10 @@ AccelStepper stepper_x(1, STEP_PIN_X, DIR_PIN_X);
 AccelStepper stepper_y(1, STEP_PIN_Y, DIR_PIN_Y);
 
 volatile bool stopRequested_x = false;
-volatile bool direction_x = RIGHT;//right = true
+volatile bool direction_x = RIGHT;
 
 volatile bool stopRequested_y = false;
-volatile bool direction_y = UP;//right = true
+volatile bool direction_y = UP;
 
 int x_right_limit = 0;
 int x_left_limit = 0;
@@ -58,13 +58,6 @@ void setup() {
   pinMode(HALL_LEFT, INPUT_PULLUP);
   pinMode(HALL_UP, INPUT_PULLUP);
   pinMode(HALL_DOWN, INPUT_PULLUP);
-
-// Enable Pin Change Interrupts on D10 and D11
-enableInterrupt(HALL_RIGHT, handleInterruptright, FALLING);
-enableInterrupt(HALL_LEFT, handleInterruptleft, FALLING);
-
-enableInterrupt(HALL_UP, handleInterruptup, FALLING);
-enableInterrupt(HALL_DOWN, handleInterruptdown, FALLING);
 
   // Enable Pin Change Interrupts on D10 and D11
   enableInterrupt(HALL_RIGHT, handleInterruptright, FALLING);
@@ -238,15 +231,23 @@ void loop() {
     // 1. Read the incoming line until a newline character
     String input = Serial.readStringUntil('\n');
         // Variables to hold your data
-    char cmd="M";
+    char cmd='M';
     int input_x=0, input_y=0;
 
     // 2. Parse the mixed data using format specifiers:
     // %c = character, %d = decimal integer
     int parsed = sscanf(input.c_str(), "%c,%d,%d", &cmd, &input_x, &input_y);
+    if (parsed < 1) {
+      Serial.println("ERROR INVALID COMMAND");
+      return;
+    }
 
     //goto certain position
     if (cmd == 'G') {
+      if (parsed < 3) {
+        Serial.println("ERROR BAD G FORMAT");
+        return;
+      }
 
       if (x_left_limit == 0 || x_right_limit == 0 || y_up_limit == 0 || y_down_limit == 0) {
         Serial.println("ERROR UNINITIALISED");
