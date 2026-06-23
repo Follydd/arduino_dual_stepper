@@ -28,7 +28,7 @@
 
 #define STEP 25
 
-#define DBG(X) X
+#define DBG(X) 
 
 enum State {
   IDLE,
@@ -131,6 +131,19 @@ void handleInterruptdown() {
   stopRequestY();
 }
 
+void stepper_xmove(int x)
+{
+  stepper_x.move(x);
+  x_current += x;
+  
+}
+void stepper_ymove(int y)
+{
+  stepper_y.move(y);
+  y_current += y;
+  
+}
+
 void stopRequestX()
 {
   // 2. Handle Interrupt Stop
@@ -143,9 +156,9 @@ void stopRequestX()
     DBG(Serial.println(stepper_x.currentPosition());)
 
     if (direction_x == RIGHT)
-      stepper_x.move(-60);
+      stepper_xmove(-60);
     if (direction_x == LEFT)
-      stepper_x.move(60);
+      stepper_xmove(60);
   }
 
 }
@@ -162,9 +175,9 @@ void stopRequestY()
     DBG(Serial.println(stepper_y.currentPosition());)
 
     if (direction_y == UP)
-      stepper_y.move(40);
+      stepper_ymove(40);
     if (direction_y == DOWN)
-      stepper_y.move(-40);
+      stepper_ymove(-40);
   }
 }
 
@@ -187,13 +200,13 @@ void calibrate()
       direction_x = RIGHT;
       stopRequested_x = false;
       DBG(Serial.println("Calibrate Moving Right...");)
-      stepper_x.move(6000);
+      stepper_xmove(6000);
       while (stopRequested_x == false)
          stepper_x.run();
  
       direction_x = LEFT;
       stopRequested_x = false;
-      stepper_x.move(-6000);
+      stepper_xmove(-6000);
       DBG(Serial.println("Calibrate Moving Left...");)
       while (stopRequested_x == false)
        stepper_x.run();
@@ -201,7 +214,7 @@ void calibrate()
 
       direction_y = UP;
       stopRequested_y = false;
-      stepper_y.move(-2000);
+      stepper_ymove(-2000);
       DBG(Serial.println("Calibrate Moving Up...");)
       while (stopRequested_y == false)
         stepper_y.run();
@@ -209,7 +222,7 @@ void calibrate()
       
       direction_y = DOWN;
       stopRequested_y = false;
-      stepper_y.move(2000);
+      stepper_ymove(2000);
       DBG(Serial.println("Calibrate Moving Down...");)
       while (stopRequested_y == false)
         stepper_y.run();
@@ -228,7 +241,9 @@ void gotoCentre()
       stepper_y.moveTo(centre_y);
       stepper_x.moveTo(centre_x);
       centre = false;
-      Serial.println("INITIALISED and READY....");
+      y_current = centre_y;
+      x_current = centre_x;
+      //Serial.println("INITIALISED and READY....");
 }
 void loop() {
 
@@ -263,7 +278,7 @@ void loop() {
     // %c = character, %d = decimal integer
     int parsed = sscanf(input.c_str(), "%c,%d,%d", &cmd, &input_x, &input_y);
     if (parsed < 1) {
-      Serial.println("ERROR INVALID COMMAND");
+      //Serial.println("ERROR INVALID COMMAND");
       return;
     }
 
@@ -271,12 +286,12 @@ void loop() {
     if (cmd == 'P') 
     {
       if (parsed < 3) {
-        Serial.println("ERROR BAD G FORMAT");
+        //Serial.println("ERROR BAD G FORMAT");
         return;
       }
 
       if (x_left_limit == 0 || x_right_limit == 0 || y_up_limit == 0 || y_down_limit == 0) {
-        Serial.println("ERROR UNINITIALISED");
+        //Serial.println("ERROR UNINITIALISED");
       // This code runs if ANY of the four variables is 0
       }
       else
@@ -301,7 +316,7 @@ void loop() {
           DBG(Serial.println("Moving Left...");)
         }
         stopRequested_x = false;
-        stepper_x.move(required_x-current_x);
+        stepper_xmove(required_x-current_x);
 
 
         DBG(Serial.println("Current Y" + String(current_y) + "Required Y" + String(required_y));)
@@ -316,9 +331,9 @@ void loop() {
           DBG(Serial.println("Moving Down...");)
         }
         stopRequested_y = false;
-        stepper_y.move(required_y-current_y);
+        stepper_ymove(required_y-current_y);
 
-        Serial.println("OK");
+        //Serial.println("OK");
       }
     }
     
@@ -329,13 +344,13 @@ void loop() {
       {
         digitalWrite(LASER, HIGH); // Turn the LED on (sends 5V or 3.3V)
         delay(100); 
-        Serial.println("OK");
+        //Serial.println("OK");
       }
       else
       {
         digitalWrite(LASER, LOW); // Turn the LED on (sends 5V or 3.3V)
         delay(100); 
-        Serial.println("OK");
+        //Serial.println("OK");
       }
     }
 
@@ -346,20 +361,20 @@ void loop() {
       delay(500);
       myservo.write(85);  // Stop
       delay(5000);
-      Serial.println("OK");
+      //Serial.println("OK");
     }
 
     if (cmd == 'R') {
       
       direction_x = RIGHT;
       stopRequested_x = false;
-      stepper_x.move(STEP);
+      stepper_xmove(STEP);
       DBG(Serial.println("Moving Right...");)
     } else if (cmd == 'L') {
       
       direction_x = LEFT;
       stopRequested_x = false;
-      stepper_x.move(-(STEP));
+      stepper_xmove(-(STEP));
       DBG(Serial.println("Moving Left...");)
     }
 
@@ -367,13 +382,13 @@ void loop() {
       
       direction_y = UP;
       stopRequested_y = false;
-      stepper_y.move(-(STEP));
+      stepper_ymove(-(STEP));
       DBG(Serial.println("Moving Up...");)
     } else if (cmd == 'D') {
       
       direction_y = DOWN;
       stopRequested_y = false;
-      stepper_y.move(STEP);
+      stepper_ymove(STEP);
       DBG(Serial.println("Moving Down...");)
     }
 
@@ -388,22 +403,20 @@ void loop() {
 
       if (cmd == 'M') {//measure
       stopRequested_y = false;
-      Serial.println("x_right_limit");
-      Serial.println(x_right_limit);
-      Serial.println("x_left_limit");
-      Serial.println(x_left_limit);
-      Serial.println("y_up_limit");
-      Serial.println(y_up_limit);
-      Serial.println("y_down_limit");
-      Serial.println(y_down_limit);
+      // Serial.println("x_right_limit");
+      // Serial.println(x_right_limit);
+      // Serial.println("x_left_limit");
+      // Serial.println(x_left_limit);
+      // Serial.println("y_up_limit");
+      // Serial.println(y_up_limit);
+      // Serial.println("y_down_limit");
+      // Serial.println(y_down_limit);
 
-      int centre_x = ((x_right_limit - x_left_limit)/2) + x_left_limit;
-      int centre_y = ((y_down_limit - y_up_limit)/2) + y_up_limit;
-      DBG(Serial.println("centre_x");)
-      DBG(Serial.println(centre_x);)
+        
+      Serial.print(x_current);
 
-      DBG(Serial.println("centre_y");)
-      DBG(Serial.println(centre_y);)
+      Serial.print(",");
+      Serial.println(y_current);
 
     } 
 
