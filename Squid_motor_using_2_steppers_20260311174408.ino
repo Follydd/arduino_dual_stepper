@@ -23,7 +23,7 @@
 #define LASER 9
 #define GUN 8
 
-#define x_SPEED 650
+#define X_SPEED 650
 #define Y_SPEED 650
 
 #define STEP 25
@@ -83,8 +83,8 @@ void setup() {
   enableInterrupt(HALL_UP, handleInterruptup, FALLING);
   enableInterrupt(HALL_DOWN, handleInterruptdown, FALLING);
 
-  stepper_x.setMaxSpeed(x_SPEED);
-  stepper_x.setAcceleration(2000);
+  stepper_x.setMaxSpeed(X_SPEED);
+  stepper_x.setAcceleration(1000);
   
   stepper_y.setMaxSpeed(Y_SPEED);
   stepper_y.setAcceleration(800);
@@ -247,23 +247,6 @@ void gotoCentre()
 }
 void loop() {
 
-  if (startup)
-  {
-
-  }
- /************* CENTRE ********************/
-  if (centre)
-  {
-
-  }
-  /************* CENTRE ********************/
-  
-  stepper_x.setMaxSpeed(1500);
-  stepper_x.setAcceleration(5000);
-  
-  stepper_y.setMaxSpeed(1500);
-  stepper_y.setAcceleration(1000);
-  
    // 1. Process Serial Commands
   char cmd='M';
   if (Serial.available() > 0) {
