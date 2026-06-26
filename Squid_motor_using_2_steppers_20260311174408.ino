@@ -26,7 +26,7 @@
 #define X_SPEED 650
 #define Y_SPEED 650
 
-#define STEP 25
+
 
 #define DBG(X) 
 
@@ -61,8 +61,13 @@ int y_up_limit = 0;
 int y_down_limit = 0;
 int x_current;
 int y_current;
-static bool startup = true;
-static bool centre = true;
+
+int X_STEP =35;
+int Y_STEP =25;
+
+static bool startup = false;
+static bool centre = false;
+
 void setup() {
 
   myservo.attach(GUN);  // attaches the servo on pin 9 to the servo object
@@ -227,7 +232,7 @@ void calibrate()
       while (stopRequested_y == false)
         stepper_y.run();
       
-    startup = false;
+    startup = true;
 }
 
 void gotoCentre()
@@ -240,7 +245,7 @@ void gotoCentre()
 
       stepper_y.moveTo(centre_y);
       stepper_x.moveTo(centre_x);
-      centre = false;
+      centre = true;
       y_current = centre_y;
       x_current = centre_x;
       //Serial.println("INITIALISED and READY....");
@@ -248,6 +253,18 @@ void gotoCentre()
 void loop() {
 
    // 1. Process Serial Commands
+  if (centre == true)
+  {
+    stepper_x.setMaxSpeed(X_SPEED+1000);
+    stepper_x.setAcceleration(2000);
+  
+    stepper_y.setMaxSpeed(Y_SPEED+1000);
+    stepper_y.setAcceleration(1800);
+
+    X_STEP =25;
+    Y_STEP =15;
+
+  }
   char cmd='M';
   if (Serial.available() > 0) {
     //char cmd = Serial.read();
@@ -351,13 +368,13 @@ void loop() {
       
       direction_x = RIGHT;
       stopRequested_x = false;
-      stepper_xmove(STEP);
+      stepper_xmove(X_STEP);
       DBG(Serial.println("Moving Right...");)
     } else if (cmd == 'L') {
       
       direction_x = LEFT;
       stopRequested_x = false;
-      stepper_xmove(-(STEP));
+      stepper_xmove(-(X_STEP));
       DBG(Serial.println("Moving Left...");)
     }
 
@@ -365,13 +382,13 @@ void loop() {
       
       direction_y = UP;
       stopRequested_y = false;
-      stepper_ymove(-(STEP));
+      stepper_ymove(-(Y_STEP));
       DBG(Serial.println("Moving Up...");)
     } else if (cmd == 'D') {
       
       direction_y = DOWN;
       stopRequested_y = false;
-      stepper_ymove(STEP);
+      stepper_ymove(Y_STEP);
       DBG(Serial.println("Moving Down...");)
     }
 
