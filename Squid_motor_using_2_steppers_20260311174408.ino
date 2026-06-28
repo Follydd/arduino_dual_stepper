@@ -286,54 +286,20 @@ void loop() {
     if (cmd == 'P') 
     {
       if (parsed < 3) {
-        //Serial.println("ERROR BAD G FORMAT");
-        return;
+        Serial.println("ERROR BAD G FORMAT");
+        //return;
       }
 
       if (x_left_limit == 0 || x_right_limit == 0 || y_up_limit == 0 || y_down_limit == 0) {
-        //Serial.println("ERROR UNINITIALISED");
+        Serial.println("ERROR UNINITIALISED");
       // This code runs if ANY of the four variables is 0
       }
       else
       {
         stopRequested_y = false;
         stopRequested_x = false;
-        
-        int current_x = stepper_x.currentPosition();
-        int current_y = stepper_y.currentPosition();
-        int required_x = translateToSteps(input_x,x_left_limit,x_right_limit);
-        int required_y = translateToSteps(input_y,y_up_limit,y_down_limit);
-        
-        DBG(Serial.println("Current X" + String(current_x) + "Required X" + String(required_x));)
-        if ((required_x - current_x) < 0)
-        {
-          direction_x = RIGHT;
-          DBG(Serial.println("Moving Right...");)
-        }
-        else
-        {
-          direction_x = LEFT;
-          DBG(Serial.println("Moving Left...");)
-        }
-        stopRequested_x = false;
-        stepper_xmove(required_x-current_x);
-
-
-        DBG(Serial.println("Current Y" + String(current_y) + "Required Y" + String(required_y));)
-        if ((required_y - current_y) < 0)
-        {
-          direction_y = UP;
-          DBG(Serial.println("Moving UP...");)
-        }
-        else
-        {
-          direction_y = DOWN;
-          DBG(Serial.println("Moving Down...");)
-        }
-        stopRequested_y = false;
-        stepper_ymove(required_y-current_y);
-
-        //Serial.println("OK");
+        stepper_xmove(input_x);
+        stepper_ymove(input_y);
       }
     }
     
@@ -364,13 +330,13 @@ void loop() {
       //Serial.println("OK");
     }
 
-    if (cmd == 'R') {
+    if (cmd == 'L') {
       
       direction_x = RIGHT;
       stopRequested_x = false;
       stepper_xmove(X_STEP);
       DBG(Serial.println("Moving Right...");)
-    } else if (cmd == 'L') {
+    } else if (cmd == 'R') {
       
       direction_x = LEFT;
       stopRequested_x = false;
