@@ -298,8 +298,8 @@ void loop() {
       {
         stopRequested_y = false;
         stopRequested_x = false;
-        stepper_xmove(input_x);
-        stepper_ymove(input_y);
+        stepper_y.moveTo(input_y);
+        stepper_x.moveTo(input_x);
       }
     }
     
@@ -369,15 +369,8 @@ void loop() {
 
       if (cmd == 'M') {//measure
       stopRequested_y = false;
-      // Serial.println("x_right_limit");
-      // Serial.println(x_right_limit);
-      // Serial.println("x_left_limit");
-      // Serial.println(x_left_limit);
-      // Serial.println("y_up_limit");
-      // Serial.println(y_up_limit);
-      // Serial.println("y_down_limit");
-      // Serial.println(y_down_limit);
-
+      x_current = stepper_x.currentPosition();
+      y_current = stepper_y.currentPosition();
         
       Serial.print(x_current);
 
